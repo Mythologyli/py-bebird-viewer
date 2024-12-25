@@ -20,16 +20,17 @@ def main():
     while True:
         try:
             data, server = client_socket.recvfrom(1500)
-            if data[4:8] == b'\xff\xd8\xff\xe0':
-                if full_data[0:4] == b'\xff\xd8\xff\xe0':
-                    try:
-                        img = np.array(Image.open(BytesIO(full_data)))
-                        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-                        cv2.imshow("bebird", img)
-                        cv2.waitKey(1)
-                    except Exception as e:
-                        print(e)
+            if data[4:6] == b'\xff\xd8':
                 full_data = data[4:]
+            elif data[-7:-5] == b'\xff\xd9':
+                full_data += data[4:-5]
+                try:
+                    img = np.array(Image.open(BytesIO(full_data)))
+                    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                    cv2.imshow("bebird", img)
+                    cv2.waitKey(1)
+                except Exception as e:
+                    print(e)
             else:
                 full_data += data[4:]
         except socket.timeout:
